@@ -40,10 +40,6 @@ proguard/
 # Log Files
 *.log
 
-# EmpaLink/E4link lib
-empalink*.aar
-E4link*.aar
-
 gradlew*
 gradle/*
 docs

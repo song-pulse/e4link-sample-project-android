@@ -66,6 +66,8 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     private TextView deviceNameLabel;
 
+    private TextView part_id;
+
     private LinearLayout dataCnt;
 
 
@@ -73,6 +75,11 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
+        //Get the bundle in order to get PID from mainactivity
+        Bundle bundle   = getIntent().getExtras();
+        //Extract the data…
+        String participant_id = bundle.getString("PID");
 
         setContentView(R.layout.activity_entry);
 
@@ -98,6 +105,11 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         batteryLabel = (TextView) findViewById(R.id.battery);
 
         deviceNameLabel = (TextView) findViewById(R.id.deviceName);
+
+        part_id = (TextView) findViewById(R.id.participant_id);
+
+        // Displays participant id
+        displayPID(part_id, "Participant ID: " +participant_id);
 
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
@@ -314,6 +326,15 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     // Update a label with some text, making sure this is run in the UI thread
     private void updateLabel(final TextView label, final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                label.setText(text);
+            }
+        });
+    }
+
+    private void displayPID(final TextView label, final String text) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

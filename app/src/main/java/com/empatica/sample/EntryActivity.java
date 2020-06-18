@@ -97,7 +97,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     private int Accx;
     private int Accy;
     private int Accz;
-    private double globaltimestamp;
+    private int globaltimestamp;
 
     private float globalbvp;
     private float globalibi;
@@ -347,7 +347,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         Accx = x;
         Accy = y;
         Accz = z;
-        globaltimestamp = timestamp;
+        globaltimestamp = (int)timestamp;
     }
 
     @Override

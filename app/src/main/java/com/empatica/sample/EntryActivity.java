@@ -70,6 +70,8 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     private LinearLayout dataCnt;
 
+    private TextView HttpResponse;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,8 +110,13 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
         part_id = (TextView) findViewById(R.id.participant_id);
 
+        HttpResponse= (TextView) findViewById(R.id.httpresponse);
+
         // Displays participant id
         displayPID(part_id, "Participant ID: " +participant_id);
+
+        // display http response
+        displayHttpResponse(HttpResponse, "Http Response: " + HttpResponse);
 
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
@@ -278,7 +285,8 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
             deviceManager.startScanning();
             // The device manager has established a connection
 
-            hide();
+            // TODO: change this back to hide()
+            show();
 
         } else if (status == EmpaStatus.CONNECTED) {
 
@@ -335,6 +343,15 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     }
 
     private void displayPID(final TextView label, final String text) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                label.setText(text);
+            }
+        });
+    }
+
+    private void displayHttpResponse(final TextView label, final String text) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

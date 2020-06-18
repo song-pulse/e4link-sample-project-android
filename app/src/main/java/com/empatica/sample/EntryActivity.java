@@ -46,6 +46,8 @@ import com.empatica.empalink.delegate.EmpaStatusDelegate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URL;
 import java.util.HashMap;
@@ -94,9 +96,9 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     private TextView HttpResponse;
 
     // save data from E4
-    private int Accx;
-    private int Accy;
-    private int Accz;
+    private float Accx;
+    private float Accy;
+    private float Accz;
     private int globaltimestamp;
 
     private float globalbvp;
@@ -475,8 +477,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     public void sendE4data(String participantId, String recordingId) {
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
         String url = "http://130.60.24.99:8080/participants/" + participantId + "/recordings/" + recordingId + "/values/timestamps";
-        // jsonBodyObj = "{"timestamp":globaltimestamp, "eda": globaleda, "ibi": globalibi,
-        // "temp": globaltemp, "acc_x": Accx, "acc_y": Accy, "acc_z": Accz }
         StringRequest stringRequest = new StringRequest(Request.Method.POST,
                 url,
                 new Response.Listener<String>() {
@@ -495,17 +495,22 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
                 })
         {
             @Override
-            protected Map <String, String>getParams() {
-                Map<String, String>  params = new HashMap<String, String>();
-                params.put("timestamp", String.valueOf(globaltimestamp));
-                params.put("eda", String.valueOf(globaleda));
-                params.put("ibi", String.valueOf(globalibi));
-                params.put("temp", String.valueOf(globaltemp));
-                params.put("acc_x", String.valueOf(Accx));
-                params.put("acc_y", String.valueOf(Accy));
-                params.put("acc_z", String.valueOf(Accz));
+            public byte[] getBody() throws AuthFailureError {
+                final JSONObject body = new JSONObject();
+                try {
+                    body.put("timestamp", String.valueOf(globaltimestamp));
+                    body.put("eda", String.valueOf(globaleda));
+                    body.put("ibi", String.valueOf(globalibi));
+                    body.put("temp", String.valueOf(globaltemp));
+                    body.put("acc_x", String.valueOf(Accx));
+                    body.put("acc_y", String.valueOf(Accy));
+                    body.put("acc_z", String.valueOf(Accz));
 
-                return params;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                return body.toString().getBytes();
             }
         };
 

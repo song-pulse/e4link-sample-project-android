@@ -15,9 +15,10 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
-import java.io.IOException;
 
 public class MainActivity extends AppCompatActivity {
+    Bundle bundle = new Bundle();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -26,7 +27,7 @@ public class MainActivity extends AppCompatActivity {
         startRecording.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // Intent intent = new Intent(MainActivity.this, EntryActivity.class);
-                String pid = sendMessage(v);
+                String pid = handlePID(v);
                 // make HTTP request here
                 sendRequest(pid);
                 // HttpRequestHelper.startNewRunForParticipant(pid);
@@ -39,18 +40,14 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Called when the user taps the Send button
      */
-    public String sendMessage(View view) {
+    public String handlePID(View view) {
         Intent intent = new Intent(this, EntryActivity.class);
         EditText participantID = (EditText) findViewById(R.id.participant_id);
         String PID = participantID.getText().toString();
-        // TODO display message
-        //Create the bundle
-        Bundle bundle = new Bundle();
         //Add your data to bundle
         bundle.putString("PID", PID);
         //Add the bundle to the intent
         intent.putExtras(bundle);
-        startActivity(intent);
         return PID;
     }
 
@@ -63,7 +60,10 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onResponse(String response) {
                         // textView.setText("Response is: "+ response.substring(0,500));
-                        Log.d("response", response.substring(0, 500));
+                        Log.d("response", response);
+                        String tmp = response.split(",")[2];
+                        String recordingId = tmp.split(":")[1];
+                        startEntryActivity(recordingId);
                     }
                 },
                 new Response.ErrorListener() {
@@ -77,5 +77,16 @@ public class MainActivity extends AppCompatActivity {
         requestQueue.add(stringRequest);
     }
 
+    /**
+     * Called when the user taps the Send button
+     */
+    public void startEntryActivity(String recordingId) {
+        Intent intent = new Intent(this, EntryActivity.class);
+        //Add your data to bundle
+        bundle.putString("recordingId", recordingId);
+        //Add the bundle to the intent
+        intent.putExtras(bundle);
+        startActivity(intent);
+    }
 
 }

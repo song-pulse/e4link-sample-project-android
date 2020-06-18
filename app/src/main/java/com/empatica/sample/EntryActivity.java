@@ -17,6 +17,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -24,6 +25,15 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.empatica.empalink.ConnectionNotAllowedException;
 import com.empatica.empalink.EmpaDeviceManager;
 import com.empatica.empalink.EmpaticaDevice;
@@ -32,6 +42,17 @@ import com.empatica.empalink.config.EmpaSensorType;
 import com.empatica.empalink.config.EmpaStatus;
 import com.empatica.empalink.delegate.EmpaDataDelegate;
 import com.empatica.empalink.delegate.EmpaStatusDelegate;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate, EmpaStatusDelegate {
@@ -72,6 +93,20 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     private TextView HttpResponse;
 
+    // save data from E4
+    private int Accx;
+    private int Accy;
+    private int Accz;
+    private double globaltimestamp;
+
+    private float globalbvp;
+    private float globalibi;
+    private float globaltemp;
+    private float globaleda;
+
+    private String pId;
+    private String rId;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,9 +114,13 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         super.onCreate(savedInstanceState);
 
         //Get the bundle in order to get PID from mainactivity
-        Bundle bundle   = getIntent().getExtras();
+        Bundle bundle = getIntent().getExtras();
         //Extract the data…
         String participant_id = bundle.getString("PID");
+        pId = participant_id;
+
+        String recordingId = bundle.getString("recordingId");
+        rId = recordingId;
 
         setContentView(R.layout.activity_entry);
 
@@ -110,10 +149,10 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
         part_id = (TextView) findViewById(R.id.participant_id);
 
-        HttpResponse= (TextView) findViewById(R.id.httpresponse);
+        HttpResponse = (TextView) findViewById(R.id.httpresponse);
 
         // Displays participant id
-        displayPID(part_id, "Participant ID: " +participant_id);
+        displayPID(part_id, "Participant ID: " + participant_id);
 
         // display http response
         displayHttpResponse(HttpResponse, "Http Response: " + HttpResponse);
@@ -180,7 +219,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     private void initEmpaticaDeviceManager() {
         // Android 6 (API level 23) now require ACCESS_COARSE_LOCATION permission to use BLE
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[] { Manifest.permission.ACCESS_COARSE_LOCATION }, REQUEST_PERMISSION_ACCESS_COARSE_LOCATION);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
 
             if (TextUtils.isEmpty(EMPATICA_API_KEY)) {
@@ -305,11 +344,16 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         updateLabel(accel_xLabel, "" + x);
         updateLabel(accel_yLabel, "" + y);
         updateLabel(accel_zLabel, "" + z);
+        Accx = x;
+        Accy = y;
+        Accz = z;
+        globaltimestamp = timestamp;
     }
 
     @Override
     public void didReceiveBVP(float bvp, double timestamp) {
         updateLabel(bvpLabel, "" + bvp);
+        globalbvp = bvp;
     }
 
     @Override
@@ -320,16 +364,19 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     @Override
     public void didReceiveGSR(float gsr, double timestamp) {
         updateLabel(edaLabel, "" + gsr);
+        globaleda = gsr;
     }
 
     @Override
     public void didReceiveIBI(float ibi, double timestamp) {
         updateLabel(ibiLabel, "" + ibi);
+        globalibi = ibi;
     }
 
     @Override
     public void didReceiveTemperature(float temp, double timestamp) {
         updateLabel(temperatureLabel, "" + temp);
+        globaltemp = temp;
     }
 
     // Update a label with some text, making sure this is run in the UI thread
@@ -382,8 +429,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
                 if (status == EmpaSensorStatus.ON_WRIST) {
 
                     ((TextView) findViewById(R.id.wrist_status_label)).setText("ON WRIST");
-                }
-                else {
+                } else {
 
                     ((TextView) findViewById(R.id.wrist_status_label)).setText("NOT ON WRIST");
                 }
@@ -392,7 +438,18 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     }
 
     void show() {
+        // send E4 data all minutes
+        // Runnable sendRunnable = new Runnable() {
+        //     @Override
+        //     public void run() {
+        //         sendE4data(pId, rId);
+        //     }
+        // };
 
+        //ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+        //exec.scheduleAtFixedRate(sendRunnable , 0, 1, TimeUnit.MINUTES);
+        sendE4data(pId, rId);
+        //
         runOnUiThread(new Runnable() {
 
             @Override
@@ -413,5 +470,46 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
                 dataCnt.setVisibility(View.INVISIBLE);
             }
         });
+    }
+
+    public void sendE4data(String participantId, String recordingId) {
+        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        String url = "http://130.60.24.99:8080/participants/" + participantId + "/recordings/" + recordingId + "/values/timestamps";
+        // jsonBodyObj = "{"timestamp":globaltimestamp, "eda": globaleda, "ibi": globalibi,
+        // "temp": globaltemp, "acc_x": Accx, "acc_y": Accy, "acc_z": Accz }
+        StringRequest stringRequest = new StringRequest(Request.Method.POST,
+                url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // textView.setText("Response is: "+ response.substring(0,500));
+                        Log.d("response", response);
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        //textView.setText("That didn't work!");
+                        Log.d("notworking", "did not work");
+                    }
+                })
+        {
+            @Override
+            protected Map <String, String>getParams() {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("timestamp", String.valueOf(globaltimestamp));
+                params.put("eda", String.valueOf(globaleda));
+                params.put("ibi", String.valueOf(globalibi));
+                params.put("temp", String.valueOf(globaltemp));
+                params.put("acc_x", String.valueOf(Accx));
+                params.put("acc_y", String.valueOf(Accy));
+                params.put("acc_z", String.valueOf(Accz));
+
+                return params;
+            }
+        };
+
+        // Add the request to the RequestQueue.
+        requestQueue.add(stringRequest);
     }
 }

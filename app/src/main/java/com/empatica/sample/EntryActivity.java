@@ -3,13 +3,11 @@ package com.empatica.sample;
 import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -21,7 +19,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -30,8 +27,6 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.VolleyLog;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.empatica.empalink.ConnectionNotAllowedException;
@@ -42,16 +37,16 @@ import com.empatica.empalink.config.EmpaSensorType;
 import com.empatica.empalink.config.EmpaStatus;
 import com.empatica.empalink.delegate.EmpaDataDelegate;
 import com.empatica.empalink.delegate.EmpaStatusDelegate;
+import com.google.gson.Gson;
+import com.spotify.android.appremote.api.ConnectionParams;
+import com.spotify.android.appremote.api.Connector;
+import com.spotify.android.appremote.api.SpotifyAppRemote;
+import com.spotify.protocol.types.Track;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.UnsupportedEncodingException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -108,6 +103,10 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     private String pId;
     private String rId;
 
+    private static final String CLIENT_ID = "6550a6a412b5465c95c32dedf34ac18d";
+    private static final String REDIRECT_URI = "http://localhost:8888/callback";
+    private SpotifyAppRemote mSpotifyAppRemote;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,9 +155,13 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
         disconnectButton.setOnClickListener(new View.OnClickListener() {
+            // TODO: add on stop for spotify music here
 
             @Override
             public void onClick(View v) {
+                // pause spotify song and close connection
+                mSpotifyAppRemote.getPlayerApi().pause();
+                SpotifyAppRemote.disconnect(mSpotifyAppRemote);
 
                 if (deviceManager != null) {
 
@@ -318,8 +321,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
             // Start scanning
             deviceManager.startScanning();
             // The device manager has established a connection
-
-            // TODO: change this back to hide()
+// TODO: change this back to hide()
             show();
 
         } else if (status == EmpaStatus.CONNECTED) {
@@ -424,25 +426,14 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     }
 
     void show() {
+
         // send E4 data all minutes
-         Runnable sendRunnable = new Runnable() {
-             @Override
-             public void run() {
-                 sendE4data(pId, rId);
-             }
-         };
+        ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+        scheduler.scheduleAtFixedRate(() -> sendE4data(pId, rId), 0, 30, TimeUnit.SECONDS);
+        spotifyStart();
 
-        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
-        exec.scheduleAtFixedRate(sendRunnable , 0, 1, TimeUnit.MINUTES);
         //
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                dataCnt.setVisibility(View.VISIBLE);
-            }
-        });
+        runOnUiThread(() -> dataCnt.setVisibility(View.VISIBLE));
     }
 
     void hide() {
@@ -467,6 +458,15 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
                     public void onResponse(String response) {
                         // textView.setText("Response is: "+ response.substring(0,500));
                         Log.d("response", response);
+                        // take newest result and queue it in spotify
+
+                        Gson gson = new Gson();
+                        Run run = gson.fromJson(response, Run.class);
+                        String latestSong = run.getLatestSong();
+                        if (!latestSong.equals("")){
+                            connected("spotify:track:"+ latestSong);
+                        }
+
                     }
                 },
                 new Response.ErrorListener() {
@@ -500,4 +500,50 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         // Add the request to the RequestQueue.
         requestQueue.add(stringRequest);
     }
+
+    public void spotifyStart() {
+        ConnectionParams connectionParams =
+                new ConnectionParams.Builder(CLIENT_ID)
+                        .setRedirectUri(REDIRECT_URI)
+                        .showAuthView(true)
+                        .build();
+        SpotifyAppRemote.connect(this, connectionParams,
+                new Connector.ConnectionListener() {
+
+                    @Override
+                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
+                        mSpotifyAppRemote = spotifyAppRemote;
+                        Log.d("EntryActivity", "Connected! Yay!");
+
+                        // Now you can start interacting with App Remote
+                        // connected("spotify:track:7lEgMCth3Nee0eeMaYmALf");
+                    }
+
+                    @Override
+                    public void onFailure(Throwable throwable) {
+                        Log.e("EntryActivity", throwable.getMessage(), throwable);
+
+                        // Something went wrong when attempting to connect! Handle errors here
+                    }
+                });
+    }
+    private void connected(String songuri) {
+        // Play a playlist
+        // TODO: replace the hardcoded playlist with the one coming from the BE (API call)
+        // TODO: check if song is finished before playlist is finished
+        mSpotifyAppRemote.getPlayerApi().queue(songuri);
+        // mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
+        // Subscribe to PlayerState
+        mSpotifyAppRemote.getPlayerApi()
+                .subscribeToPlayerState()
+                .setEventCallback(playerState -> {
+                    final Track track = playerState.track;
+                    if (track != null) {
+                        Log.d("EntryActivity", track.name + " by " + track.artist.name);
+                    }
+                });
+
+
+    }
+
 }

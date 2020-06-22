@@ -61,3 +61,7 @@ dependencies {
     implementation project(':spotify-app-remote-release-0.7.0')
     implementation "com.google.code.gson:gson:2.8.5"
 }
+
+configurations {
+    compile.exclude group: "junit", module: "junit"
+}

@@ -93,7 +93,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     private LinearLayout dataCnt;
 
-    private TextView HttpResponse;
 
     // save data from E4
     private float Accx;
@@ -151,14 +150,8 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
         part_id = (TextView) findViewById(R.id.participant_id);
 
-        HttpResponse = (TextView) findViewById(R.id.httpresponse);
-
         // Displays participant id
         displayPID(part_id, "Participant ID: " + participant_id);
-
-        // display http response
-        displayHttpResponse(HttpResponse, "Http Response: " + HttpResponse);
-
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
@@ -392,15 +385,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     }
 
     private void displayPID(final TextView label, final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                label.setText(text);
-            }
-        });
-    }
-
-    private void displayHttpResponse(final TextView label, final String text) {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {

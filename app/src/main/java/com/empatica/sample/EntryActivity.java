@@ -441,16 +441,15 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     void show() {
         // send E4 data all minutes
-        // Runnable sendRunnable = new Runnable() {
-        //     @Override
-        //     public void run() {
-        //         sendE4data(pId, rId);
-        //     }
-        // };
+         Runnable sendRunnable = new Runnable() {
+             @Override
+             public void run() {
+                 sendE4data(pId, rId);
+             }
+         };
 
-        //ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
-        //exec.scheduleAtFixedRate(sendRunnable , 0, 1, TimeUnit.MINUTES);
-        sendE4data(pId, rId);
+        ScheduledExecutorService exec = Executors.newScheduledThreadPool(1);
+        exec.scheduleAtFixedRate(sendRunnable , 0, 1, TimeUnit.MINUTES);
         //
         runOnUiThread(new Runnable() {
 

@@ -3,7 +3,6 @@ package com.empatica.sample;
 import android.Manifest;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -22,11 +21,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.empatica.empalink.ConnectionNotAllowedException;
@@ -41,12 +37,10 @@ import com.google.gson.Gson;
 import com.spotify.android.appremote.api.ConnectionParams;
 import com.spotify.android.appremote.api.Connector;
 import com.spotify.android.appremote.api.SpotifyAppRemote;
-import com.spotify.protocol.types.Track;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -119,8 +113,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         String participant_id = bundle.getString("PID");
         pId = participant_id;
 
-        String recordingId = bundle.getString("recordingId");
-        rId = recordingId;
+        rId = bundle.getString("recordingId");
 
         setContentView(R.layout.activity_entry);
 
@@ -154,19 +147,12 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
-        disconnectButton.setOnClickListener(new View.OnClickListener() {
-            // TODO: add on stop for spotify music here
-
-            @Override
-            public void onClick(View v) {
-                // pause spotify song and close connection
-                mSpotifyAppRemote.getPlayerApi().pause();
-                SpotifyAppRemote.disconnect(mSpotifyAppRemote);
-
-                if (deviceManager != null) {
-
-                    deviceManager.disconnect();
-                }
+        disconnectButton.setOnClickListener(v -> {
+            // pause spotify song and close connection
+            mSpotifyAppRemote.getPlayerApi().pause();
+            SpotifyAppRemote.disconnect(mSpotifyAppRemote);
+            if (deviceManager != null) {
+                deviceManager.disconnect();
             }
         });
 
@@ -175,42 +161,33 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_PERMISSION_ACCESS_COARSE_LOCATION:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Permission was granted, yay!
-                    initEmpaticaDeviceManager();
-                } else {
-                    // Permission denied, boo!
-                    final boolean needRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION);
-                    new AlertDialog.Builder(this)
-                            .setTitle("Permission required")
-                            .setMessage("Without this permission bluetooth low energy devices cannot be found, allow it in order to connect to the device.")
-                            .setPositiveButton("Retry", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // try again
-                                    if (needRationale) {
-                                        // the "never ask again" flash is not set, try again with permission request
-                                        initEmpaticaDeviceManager();
-                                    } else {
-                                        // the "never ask again" flag is set so the permission requests is disabled, try open app settings to enable the permission
-                                        Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
-                                        Uri uri = Uri.fromParts("package", getPackageName(), null);
-                                        intent.setData(uri);
-                                        startActivity(intent);
-                                    }
-                                }
-                            })
-                            .setNegativeButton("Exit application", new DialogInterface.OnClickListener() {
-                                public void onClick(DialogInterface dialog, int which) {
-                                    // without permission exit is the only way
-                                    finish();
-                                }
-                            })
-                            .show();
-                }
-                break;
+        if (requestCode == REQUEST_PERMISSION_ACCESS_COARSE_LOCATION) {
+            // If request is cancelled, the result arrays are empty.
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission was granted, yay!
+                initEmpaticaDeviceManager();
+            } else {
+                // Permission denied, boo!
+                final boolean needRationale = ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION);
+                new AlertDialog.Builder(this)
+                        .setTitle("Permission required")
+                        .setMessage("Without this permission bluetooth low energy devices cannot be found, allow it in order to connect to the device.")
+                        .setPositiveButton("Retry", (dialog, which) -> {
+                            // try again
+                            if (needRationale) {
+                                // the "never ask again" flash is not set, try again with permission request
+                                initEmpaticaDeviceManager();
+                            } else {
+                                // the "never ask again" flag is set so the permission requests is disabled, try open app settings to enable the permission
+                                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                                Uri uri = Uri.fromParts("package", getPackageName(), null);
+                                intent.setData(uri);
+                                startActivity(intent);
+                            }
+                        })
+                        .setNegativeButton("Exit application", (dialog, which) -> finish())
+                        .show();
+            }
         }
     }
 
@@ -219,17 +196,11 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, REQUEST_PERMISSION_ACCESS_COARSE_LOCATION);
         } else {
-
             if (TextUtils.isEmpty(EMPATICA_API_KEY)) {
                 new AlertDialog.Builder(this)
                         .setTitle("Warning")
                         .setMessage("Please insert your API KEY")
-                        .setNegativeButton("Close", new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int which) {
-                                // without permission exit is the only way
-                                finish();
-                            }
-                        })
+                        .setNegativeButton("Close", (dialog, which) -> finish())
                         .show();
                 return;
             }
@@ -306,7 +277,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     @Override
     public void didUpdateSensorStatus(@EmpaSensorStatus int status, EmpaSensorType type) {
-
         didUpdateOnWristStatus(status);
     }
 
@@ -321,26 +291,18 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
             // Start scanning
             deviceManager.startScanning();
             // The device manager has established a connection
-// TODO: change this back to hide()
-            show();
-
+            hide();
         } else if (status == EmpaStatus.CONNECTED) {
-
             show();
             // The device manager disconnected from a device
         } else if (status == EmpaStatus.DISCONNECTED) {
-
             updateLabel(deviceNameLabel, "");
-
             hide();
         }
     }
 
     @Override
     public void didReceiveAcceleration(int x, int y, int z, double timestamp) {
-        updateLabel(accel_xLabel, "" + x);
-        updateLabel(accel_yLabel, "" + y);
-        updateLabel(accel_zLabel, "" + z);
         Accx = x;
         Accy = y;
         Accz = z;
@@ -349,7 +311,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     @Override
     public void didReceiveBVP(float bvp, double timestamp) {
-        updateLabel(bvpLabel, "" + bvp);
         globalbvp = bvp;
     }
 
@@ -360,39 +321,26 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     @Override
     public void didReceiveGSR(float gsr, double timestamp) {
-        updateLabel(edaLabel, "" + gsr);
         globaleda = gsr;
     }
 
     @Override
     public void didReceiveIBI(float ibi, double timestamp) {
-        updateLabel(ibiLabel, "" + ibi);
         globalibi = ibi;
     }
 
     @Override
     public void didReceiveTemperature(float temp, double timestamp) {
-        updateLabel(temperatureLabel, "" + temp);
         globaltemp = temp;
     }
 
     // Update a label with some text, making sure this is run in the UI thread
     private void updateLabel(final TextView label, final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                label.setText(text);
-            }
-        });
+        runOnUiThread(() -> label.setText(text));
     }
 
     private void displayPID(final TextView label, final String text) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                label.setText(text);
-            }
-        });
+        runOnUiThread(() -> label.setText(text));
     }
 
     @Override
@@ -402,50 +350,31 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     @Override
     public void didEstablishConnection() {
-
         show();
     }
 
     @Override
     public void didUpdateOnWristStatus(@EmpaSensorStatus final int status) {
-
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                if (status == EmpaSensorStatus.ON_WRIST) {
-
-                    ((TextView) findViewById(R.id.wrist_status_label)).setText("ON WRIST");
-                } else {
-
-                    ((TextView) findViewById(R.id.wrist_status_label)).setText("NOT ON WRIST");
-                }
+        runOnUiThread(() -> {
+            if (status == EmpaSensorStatus.ON_WRIST) {
+                ((TextView) findViewById(R.id.wrist_status_label)).setText("ON WRIST");
+            } else {
+                ((TextView) findViewById(R.id.wrist_status_label)).setText("NOT ON WRIST");
             }
         });
     }
 
     void show() {
-
+        spotifyStart();
         // send E4 data all minutes
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(() -> sendE4data(pId, rId), 0, 30, TimeUnit.SECONDS);
-        spotifyStart();
 
-        //
         runOnUiThread(() -> dataCnt.setVisibility(View.VISIBLE));
     }
 
     void hide() {
-
-        runOnUiThread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                dataCnt.setVisibility(View.INVISIBLE);
-            }
-        });
+        runOnUiThread(() -> dataCnt.setVisibility(View.INVISIBLE));
     }
 
     public void sendE4data(String participantId, String recordingId) {
@@ -453,32 +382,20 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         String url = "http://130.60.24.99:8080/participants/" + participantId + "/recordings/" + recordingId + "/values/timestamps";
         StringRequest stringRequest = new StringRequest(Request.Method.POST,
                 url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        // textView.setText("Response is: "+ response.substring(0,500));
-                        Log.d("response", response);
-                        // take newest result and queue it in spotify
-
-                        Gson gson = new Gson();
-                        Run run = gson.fromJson(response, Run.class);
-                        String latestSong = run.getLatestSong();
-                        if (!latestSong.equals("")){
-                            connected("spotify:track:"+ latestSong);
-                        }
-
+                response -> {
+                    Log.d("response", response);
+                    // take newest result and queue it in spotify
+                    Gson gson = new Gson();
+                    Run run = gson.fromJson(response, Run.class);
+                    String latestSong = run.getLatestSong();
+                    if (!latestSong.equals("")){
+                        mSpotifyAppRemote.getPlayerApi().queue("spotify:track:"+ latestSong);
                     }
                 },
-                new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        //textView.setText("That didn't work!");
-                        Log.d("notworking", "did not work");
-                    }
-                })
+                error -> Log.d("notworking", "did not work"))
         {
             @Override
-            public byte[] getBody() throws AuthFailureError {
+            public byte[] getBody() {
                 final JSONObject body = new JSONObject();
                 try {
                     body.put("timestamp", String.valueOf(globaltimestamp));
@@ -513,37 +430,12 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
                     @Override
                     public void onConnected(SpotifyAppRemote spotifyAppRemote) {
                         mSpotifyAppRemote = spotifyAppRemote;
-                        Log.d("EntryActivity", "Connected! Yay!");
-
-                        // Now you can start interacting with App Remote
-                        // connected("spotify:track:7lEgMCth3Nee0eeMaYmALf");
                     }
 
                     @Override
                     public void onFailure(Throwable throwable) {
-                        Log.e("EntryActivity", throwable.getMessage(), throwable);
-
-                        // Something went wrong when attempting to connect! Handle errors here
                     }
                 });
-    }
-    private void connected(String songuri) {
-        // Play a playlist
-        // TODO: replace the hardcoded playlist with the one coming from the BE (API call)
-        // TODO: check if song is finished before playlist is finished
-        mSpotifyAppRemote.getPlayerApi().queue(songuri);
-        // mSpotifyAppRemote.getPlayerApi().play("spotify:playlist:37i9dQZF1DX2sUQwD7tbmL");
-        // Subscribe to PlayerState
-        mSpotifyAppRemote.getPlayerApi()
-                .subscribeToPlayerState()
-                .setEventCallback(playerState -> {
-                    final Track track = playerState.track;
-                    if (track != null) {
-                        Log.d("EntryActivity", track.name + " by " + track.artist.name);
-                    }
-                });
-
-
     }
 
 }

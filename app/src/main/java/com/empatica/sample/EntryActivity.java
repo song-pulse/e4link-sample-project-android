@@ -33,10 +33,6 @@ import com.empatica.empalink.config.EmpaSensorType;
 import com.empatica.empalink.config.EmpaStatus;
 import com.empatica.empalink.delegate.EmpaDataDelegate;
 import com.empatica.empalink.delegate.EmpaStatusDelegate;
-import com.google.gson.Gson;
-import com.spotify.android.appremote.api.ConnectionParams;
-import com.spotify.android.appremote.api.Connector;
-import com.spotify.android.appremote.api.SpotifyAppRemote;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -99,7 +95,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     private static final String CLIENT_ID = "6550a6a412b5465c95c32dedf34ac18d";
     private static final String REDIRECT_URI = "http://localhost:8888/callback";
-    private SpotifyAppRemote mSpotifyAppRemote;
 
 
     @Override
@@ -148,9 +143,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         final Button disconnectButton = findViewById(R.id.disconnectButton);
 
         disconnectButton.setOnClickListener(v -> {
-            // pause spotify song and close connection
-            mSpotifyAppRemote.getPlayerApi().pause();
-            SpotifyAppRemote.disconnect(mSpotifyAppRemote);
             if (deviceManager != null) {
                 deviceManager.disconnect();
             }
@@ -303,6 +295,9 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     @Override
     public void didReceiveAcceleration(int x, int y, int z, double timestamp) {
+        updateLabel(accel_xLabel, "" + x);
+        updateLabel(accel_yLabel, "" + y);
+        updateLabel(accel_zLabel, "" + z);
         Accx = x;
         Accy = y;
         Accz = z;
@@ -311,6 +306,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     @Override
     public void didReceiveBVP(float bvp, double timestamp) {
+        updateLabel(bvpLabel, "" + bvp);
         globalbvp = bvp;
     }
 
@@ -326,11 +322,13 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     @Override
     public void didReceiveIBI(float ibi, double timestamp) {
+        updateLabel(ibiLabel, "" + ibi);
         globalibi = ibi;
     }
 
     @Override
     public void didReceiveTemperature(float temp, double timestamp) {
+        updateLabel(temperatureLabel, "" + temp);
         globaltemp = temp;
     }
 
@@ -365,7 +363,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     }
 
     void show() {
-        spotifyStart();
         // send E4 data all minutes
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
         scheduler.scheduleAtFixedRate(() -> sendE4data(pId, rId), 0, 30, TimeUnit.SECONDS);
@@ -384,13 +381,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
                 url,
                 response -> {
                     Log.d("response", response);
-                    // take newest result and queue it in spotify
-                    Gson gson = new Gson();
-                    Run run = gson.fromJson(response, Run.class);
-                    String latestSong = run.getLatestSong();
-                    if (!latestSong.equals("")){
-                        mSpotifyAppRemote.getPlayerApi().queue("spotify:track:"+ latestSong);
-                    }
                 },
                 error -> Log.d("notworking", "did not work"))
         {
@@ -416,26 +406,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
         // Add the request to the RequestQueue.
         requestQueue.add(stringRequest);
-    }
-
-    public void spotifyStart() {
-        ConnectionParams connectionParams =
-                new ConnectionParams.Builder(CLIENT_ID)
-                        .setRedirectUri(REDIRECT_URI)
-                        .showAuthView(true)
-                        .build();
-        SpotifyAppRemote.connect(this, connectionParams,
-                new Connector.ConnectionListener() {
-
-                    @Override
-                    public void onConnected(SpotifyAppRemote spotifyAppRemote) {
-                        mSpotifyAppRemote = spotifyAppRemote;
-                    }
-
-                    @Override
-                    public void onFailure(Throwable throwable) {
-                    }
-                });
     }
 
 }

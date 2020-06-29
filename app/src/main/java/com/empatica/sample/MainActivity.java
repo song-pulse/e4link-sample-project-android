@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // start Spotify Activity
+        startSpotifyActivity();
         Button startRecording = (Button) findViewById(R.id.start_Recording);
         startRecording.setOnClickListener(v -> {
             String pid = handlePID(v);
@@ -70,6 +72,11 @@ public class MainActivity extends AppCompatActivity {
         //Add the bundle to the intent
         intent.putExtras(bundle);
         startActivity(intent);
+    }
+
+    public void startSpotifyActivity() {
+        Intent spotifyIntent = new Intent(this, SpotifyActivity.class);
+        startActivity(spotifyIntent);
     }
 
 }

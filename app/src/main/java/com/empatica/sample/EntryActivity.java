@@ -365,7 +365,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     void show() {
         // send E4 data all minutes
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
-        scheduler.scheduleAtFixedRate(() -> sendE4data(pId, rId), 0, 30, TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(() -> sendE4data(pId, rId), 0, 10, TimeUnit.SECONDS);
 
         runOnUiThread(() -> dataCnt.setVisibility(View.VISIBLE));
     }

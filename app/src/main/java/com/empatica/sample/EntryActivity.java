@@ -21,6 +21,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.StringRequest;
@@ -37,6 +38,8 @@ import com.empatica.empalink.delegate.EmpaStatusDelegate;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -92,6 +95,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     private String pId;
     private String rId;
+    private String mainCookie;
 
     private static final String CLIENT_ID = "6550a6a412b5465c95c32dedf34ac18d";
     private static final String REDIRECT_URI = "http://localhost:8888/callback";
@@ -109,6 +113,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         pId = participant_id;
 
         rId = bundle.getString("recordingId");
+        mainCookie = SpotifyActivity.cookie;
 
         setContentView(R.layout.activity_entry);
 
@@ -401,6 +406,14 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
                 }
 
                 return body.toString().getBytes();
+            }
+
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<>();
+                params.put("Cookie", mainCookie);
+
+                return params;
             }
         };
 

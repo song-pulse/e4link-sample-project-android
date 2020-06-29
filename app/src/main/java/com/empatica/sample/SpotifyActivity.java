@@ -1,40 +1,44 @@
 package com.empatica.sample;
-
-import android.content.Intent;
-import android.net.Uri;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
+import android.webkit.CookieManager;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
 public class SpotifyActivity extends AppCompatActivity {
+
+    public static String cookie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_spotify);
-        this.getSpotify();
-    }
-
-    // send request for spotify and open in browser
-
-    public void getSpotify() {
-        RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
+        WebView myWebView = findViewById(R.id.webview);
+        myWebView.setWebViewClient(new MyBrowser());
         String spotifyUrl = "http://130.60.24.99:8080/spotify/authorize";
-        StringRequest spotifyRequest = new StringRequest(Request.Method.GET,
-                spotifyUrl,
-                response -> {
-                    Log.d("response", String.valueOf(response));
-
-                },
-                error -> Log.d("notworking", "did not work"));
-                requestQueue.add(spotifyRequest);
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(spotifyUrl));
-        startActivity(browserIntent);
-        SpotifyActivity.this.finish(); // finish spotifyActivity
+        myWebView.loadUrl(spotifyUrl);
     }
+
+    // send request for spotify
+    private class MyBrowser extends WebViewClient {
+        @Override
+        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+            Log.d("spotifyurl", "Url"+url);
+
+            if(url.contains("whoami")) {
+                //onPageFinished(view, url);
+                cookie = CookieManager.getInstance().getCookie(url);
+                Log.d("cookieSpotify", "All the cookies in a string:" + cookie);
+                // only do this if url is callback
+                if(url.contains("whoami")) {
+                    SpotifyActivity.this.finish(); // finish spotifyActivity
+                }
+            }
+            return false;
+        }
+    }
+
+
 }

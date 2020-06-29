@@ -6,4 +6,14 @@
     android:layout_height="match_parent"
     tools:context="com.empatica.sample.OverviewActivity">
 
+    <TextView
+        android:id="@+id/overviewtitle"
+        android:layout_marginTop="3dp"
+        android:textSize="15dp"
+        android:text="Data and Stress Overview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:ignore="MissingConstraints" />
+
+
 </android.support.constraint.ConstraintLayout>

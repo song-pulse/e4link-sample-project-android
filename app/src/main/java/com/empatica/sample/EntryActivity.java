@@ -431,5 +431,5 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         Intent intent = new Intent(this, OverviewActivity.class);
         startActivity(intent);
     }
-    
+
 }

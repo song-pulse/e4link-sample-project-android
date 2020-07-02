@@ -153,12 +153,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
             }
         });
 
-        Button overViewButton = (Button) findViewById(R.id.gotoOverview);
-        overViewButton.setOnClickListener(v -> {
-            // change to Overview activity
-            startActivity();
-        });
-
         initEmpaticaDeviceManager();
     }
 
@@ -427,9 +421,4 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         requestQueue.add(stringRequest);
     }
 
-    public void startActivity() {
-        Intent intent = new Intent(this, OverviewActivity.class);
-        startActivity(intent);
-    }
-    
 }

@@ -168,6 +168,12 @@
             android:text="@string/emptyText"/>
 
         <Button
+            android:id="@+id/dislike_music"
+            android:text="Dislike current song"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
             android:id="@+id/disconnectButton"
             android:text="STOP STREAMING"
             android:layout_width="match_parent"

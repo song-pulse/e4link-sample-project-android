@@ -159,6 +159,11 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
             startActivity();
         });
 
+        Button dislikeMusicButton = (Button) findViewById(R.id.dislike_music);
+        dislikeMusicButton.setOnClickListener(v -> {
+            sendFeedback();
+        });
+
         initEmpaticaDeviceManager();
     }
 
@@ -430,6 +435,11 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     public void startActivity() {
         Intent intent = new Intent(this, OverviewActivity.class);
         startActivity(intent);
+    }
+
+    public void sendFeedback() {
+        // TODO: here Post request to backend which sends information that there is bad feedback
+        // when backend gets this request they know that they have to remove the current song from the playlist
     }
 
 

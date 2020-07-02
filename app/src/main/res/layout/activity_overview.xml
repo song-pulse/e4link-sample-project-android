@@ -13,19 +13,33 @@
 
         <TextView
             android:id="@+id/overviewtitle"
-            android:textSize="15dp"
+            android:textSize="20dp"
+            android:textStyle="bold"
             android:text="Data and Stress Overview"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp"/>
+            android:layout_marginBottom="10dp"/>
 
         <TextView
             android:layout_marginTop="20dp"
             android:layout_below="@id/overviewtitle"
+            android:textStyle="bold"
             android:id = "@+id/participant_id"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text ="Participant ID" />
+            android:text ="Participant ID"
+            android:layout_marginBottom="10dp"
+            />
+
+        <TextView
+            android:id="@+id/stressgraph"
+            android:layout_below="@id/participant_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text ="StressLevel during last run"
+            android:textStyle="bold"
+            android:layout_marginBottom="10dp"
+            />
 
         <com.jjoe64.graphview.GraphView
             android:layout_width="match_parent"

@@ -1,18 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.empatica.sample.OverviewActivity">
 
-    <TextView
-        android:id="@+id/overviewtitle"
-        android:layout_marginTop="3dp"
-        android:textSize="15dp"
-        android:text="Data and Stress Overview"
-        android:layout_width="match_parent"
+    <LinearLayout
         android:layout_height="wrap_content"
-        tools:ignore="MissingConstraints" />
+        android:layout_width="match_parent"
+        android:orientation="horizontal">
 
-</android.support.constraint.ConstraintLayout>
+        <TextView
+            android:id="@+id/overviewtitle"
+            android:textSize="15dp"
+            android:text="Data and Stress Overview"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="20dp"/>
+
+        <TextView
+            android:layout_marginTop="20dp"
+            android:layout_below="@id/overviewtitle"
+            android:id = "@+id/participant_id"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text ="Participant ID" />
+
+    </LinearLayout>
+
+</LinearLayout>

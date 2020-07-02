@@ -93,7 +93,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     private float globaltemp;
     private float globaleda;
 
-    public static String pId;
+    private String pId;
     private String rId;
     private String mainCookie;
 

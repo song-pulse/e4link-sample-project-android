@@ -26,4 +26,12 @@
         android:text="Start Recording"
         android:background="#001f3f"
         android:textColor="#ffffff"/>
+
+    <Button
+        android:id="@+id/open_Overview"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Overview"
+        android:background="#001f3f"
+        android:textColor="#ffffff"/>
 </LinearLayout>

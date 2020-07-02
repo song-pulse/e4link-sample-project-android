@@ -29,6 +29,11 @@ public class MainActivity extends AppCompatActivity {
             // make HTTP request here
             sendRequest(pid);
         });
+
+        Button startOverview = (Button) findViewById(R.id.open_Overview);
+        startOverview.setOnClickListener(v -> {
+            startOverviewActivity();
+        });
     }
 
 
@@ -77,6 +82,11 @@ public class MainActivity extends AppCompatActivity {
     public void startSpotifyActivity() {
         Intent spotifyIntent = new Intent(this, SpotifyActivity.class);
         startActivity(spotifyIntent);
+    }
+
+    public void startOverviewActivity() {
+        Intent overviewIntent = new Intent(this, OverviewActivity.class);
+        startActivity(overviewIntent);
     }
 
 }

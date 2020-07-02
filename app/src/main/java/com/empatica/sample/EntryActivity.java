@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -163,6 +164,11 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
         dislikeMusicButton.setOnClickListener(v -> {
             sendFeedback();
         });
+
+        final LinearLayout layout = (LinearLayout) findViewById(R.id.ActivityEntry);
+        // layout.setBackgroundColor(Color.RED);
+        // TODO: this is the way we can change background color of this Activity, change this
+        // according to stress level as soon as this request is here
 
         initEmpaticaDeviceManager();
     }

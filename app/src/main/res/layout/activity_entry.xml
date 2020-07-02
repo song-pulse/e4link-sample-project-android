@@ -5,6 +5,7 @@
     tools:context=".EntryActivity"
     android:orientation="vertical"
     android:padding="16dp"
+    android:id="@+id/ActivityEntry"
     android:background="@android:color/holo_blue_dark">
 
     <TextView

@@ -172,19 +172,27 @@
             android:id="@+id/dislike_music"
             android:text="Dislike current song"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:background="#001f3f"
+            android:textColor="#ffffff"
+            android:layout_marginBottom="10dp"/>
 
         <Button
             android:id="@+id/disconnectButton"
             android:text="STOP STREAMING"
             android:layout_width="match_parent"
-            android:layout_height="44dp" />
+            android:layout_height="44dp"
+            android:background="#001f3f"
+            android:textColor="#ffffff"
+            android:layout_marginBottom="10dp"/>
 
         <Button
             android:id="@+id/gotoOverview"
             android:text="See Overview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:background="#001f3f"
+            android:textColor="#ffffff" />
 
     </LinearLayout>
 

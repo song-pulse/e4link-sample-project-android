@@ -1,5 +1,6 @@
 package com.empatica.sample;
 
+import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.widget.TextView;
@@ -32,6 +33,7 @@ public class OverviewActivity extends AppCompatActivity {
                 new DataPoint(1, 5),
                 new DataPoint(2, 3)
         });
+        series.setColor(Color.RED);
         graph.addSeries(series);
     }
 

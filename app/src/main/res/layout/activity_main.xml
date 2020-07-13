@@ -10,9 +10,25 @@
         android:id="@+id/text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Welcome to song-pulse app. Please enter your participant ID."
+        android:text="Welcome to SongPulse App"
+        android:textStyle="bold"
         android:textSize="25dp"
-        android:layout_marginTop="250dp"/>
+        android:layout_marginTop="20dp"/>
+    <TextView
+        android:id="@+id/info"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="This App supports you in achieving a great concentration level during your workday using automatic music adaption according to your stress level."
+        android:textSize="20dp"
+        android:layout_marginTop="20dp"/>
+
+    <TextView
+        android:id="@+id/helptext"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Please start a song in your Spotify and enter your participant ID."
+        android:textSize="20dp"
+        android:layout_marginTop="150dp"/>
     <EditText
         android:id="@+id/participant_id"
         android:layout_width="match_parent"

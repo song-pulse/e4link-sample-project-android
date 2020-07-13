@@ -19,6 +19,28 @@
         android:layout_width="match_parent"
         android:layout_height="36dp"/>
 
+    <TextView
+        android:id="@+id/battery_label"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/battery_label" />
+
+    <TextView
+        android:layout_below="@id/battery_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/battery"
+        android:text="@string/emptyText"/>
+
+    <TextView
+        android:layout_below="@id/wrist_status_label"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/wrist_status_label"
+        android:text="@string/emptyText"/>
+
     <LinearLayout
         android:visibility="invisible"
         android:id="@+id/dataArea"
@@ -32,6 +54,9 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text ="Participant ID"
+            android:textStyle="bold"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
             />
 
         <TextView
@@ -39,7 +64,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
-            android:text="@string/accel" />
+            android:text="@string/accel"
+            android:textStyle="bold"/>
 
         <LinearLayout
             android:id="@+id/accel_area"
@@ -92,7 +118,8 @@
             android:layout_below="@id/accel_area"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/bvp_label" />
+            android:text="@string/bvp_label"
+            android:textStyle="bold"/>
 
         <TextView
             android:layout_below="@id/bvp_label"
@@ -107,7 +134,8 @@
             android:layout_below="@id/bvp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/eda_label" />
+            android:text="@string/eda_label"
+            android:textStyle="bold"/>
 
         <TextView
             android:layout_below="@id/eda_label"
@@ -122,7 +150,8 @@
             android:layout_below="@id/eda"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/ibi_label" />
+            android:text="@string/ibi_label"
+            android:textStyle="bold"/>
 
         <TextView
             android:layout_below="@id/ibi_label"
@@ -137,7 +166,8 @@
             android:layout_below="@id/ibi"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/temp_label" />
+            android:text="@string/temp_label"
+            android:textStyle="bold"/>
 
         <TextView
             android:layout_below="@id/temp_label"
@@ -146,27 +176,6 @@
             android:id="@+id/temperature"
             android:text="@string/emptyText"/>
 
-        <TextView
-            android:id="@+id/battery_label"
-            android:layout_marginTop="10dp"
-            android:layout_below="@id/temperature"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/battery_label" />
-
-        <TextView
-            android:layout_below="@id/battery_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/battery"
-            android:text="@string/emptyText"/>
-
-        <TextView
-            android:layout_below="@id/wrist_status_label"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/wrist_status_label"
-            android:text="@string/emptyText"/>
 
         <Button
             android:id="@+id/dislike_music"
@@ -175,6 +184,7 @@
             android:layout_height="wrap_content"
             android:background="#001f3f"
             android:textColor="#ffffff"
+            android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"/>
 
         <Button

@@ -18,7 +18,7 @@ public class SpotifyActivity extends AppCompatActivity {
         WebView myWebView = findViewById(R.id.webview);
         myWebView.getSettings().setJavaScriptEnabled(true);
         myWebView.setWebViewClient(new MyBrowser());
-        String spotifyUrl = "http://130.60.24.99:8080/spotify/authorize";
+        String spotifyUrl =  MainActivity.baseUrl + "spotify/authorize";
         myWebView.loadUrl(spotifyUrl);
     }
 

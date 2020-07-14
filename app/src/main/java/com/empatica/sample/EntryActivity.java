@@ -98,9 +98,6 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
     private String rId;
     private String mainCookie;
 
-    private static final String CLIENT_ID = "6550a6a412b5465c95c32dedf34ac18d";
-    private static final String REDIRECT_URI = "http://localhost:8888/callback";
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -398,7 +395,7 @@ public class EntryActivity extends AppCompatActivity implements EmpaDataDelegate
 
     public void sendE4data(String participantId, String recordingId) {
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        String url = "http://130.60.24.99:8080/participants/" + participantId + "/recordings/" + recordingId + "/values/timestamps";
+        String url = MainActivity.baseUrl + "participants/" + participantId + "/recordings/" + recordingId + "/values/timestamps";
         StringRequest stringRequest = new StringRequest(Request.Method.POST,
                 url,
                 response -> {

@@ -16,6 +16,9 @@ import com.android.volley.toolbox.Volley;
 
 public class MainActivity extends AppCompatActivity {
     Bundle bundle = new Bundle();
+    // TODO: comment below in for ngrok testing
+    // public static final String baseUrl = "http://150c4323aa8a.ngrok.io/";
+    public static final String baseUrl = "http://130.60.24.99:8080/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
 
     public void sendRequest(String participant_id) {
         RequestQueue requestQueue = Volley.newRequestQueue(getApplicationContext());
-        String url = ("http://130.60.24.99:8080/participants/" + participant_id + "/recordings/start");
+        String url = (baseUrl + "participants/" + participant_id + "/recordings/start");
         StringRequest stringRequest = new StringRequest(Request.Method.POST,
                 url,
                 response -> {
